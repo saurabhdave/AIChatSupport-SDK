@@ -18,6 +18,7 @@ public final class ChatViewModel {
 
     private let configuration: AIChatConfiguration
     private var isRetryingAfterContextTrim: Bool = false
+    private var streamTask: Task<Void, Never>?
 
     // MARK: – Init
 
@@ -58,13 +59,13 @@ public final class ChatViewModel {
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isLoading else { return }
         inputText = ""
-        Task { await send(text: text) }
+        startStream { await self.send(text: text) }
     }
 
     /// Sends a suggested prompt as if the user typed it.
     public func sendSuggestedPrompt(_ text: String) {
         guard !isLoading else { return }
-        Task { await send(text: text) }
+        startStream { await self.send(text: text) }
     }
 
     /// Retries sending after a failed bot response.
@@ -73,7 +74,20 @@ public final class ChatViewModel {
         messages.remove(at: failedIndex)
 
         guard let lastUserMessage = messages.last(where: { $0.role == .user }) else { return }
-        Task { await send(text: lastUserMessage.content) }
+        startStream { await self.send(text: lastUserMessage.content) }
+    }
+
+    /// Retries the most recently failed message, used by the error banner.
+    public func retryLastFailed() {
+        guard let failed = messages.last(where: { $0.isFailed }) else { return }
+        clearError()
+        retry(messageID: failed.id)
+    }
+
+    /// Cancels any in-flight request. Call when the chat is dismissed or torn down.
+    public func cancel() {
+        streamTask?.cancel()
+        streamTask = nil
     }
 
     /// Records thumbs-up or thumbs-down feedback on a message.
@@ -87,12 +101,21 @@ public final class ChatViewModel {
 
     /// Removes all messages and resets conversation state.
     public func clearConversation() {
+        cancel()
         messages = []
         error = nil
         inputText = ""
+        isLoading = false
+        isTyping = false
     }
 
     // MARK: – Private
+
+    /// Cancels any prior in-flight request and starts a new one, tracking it for cancellation.
+    private func startStream(_ operation: @escaping @MainActor () async -> Void) {
+        streamTask?.cancel()
+        streamTask = Task { await operation() }
+    }
 
     private func send(text: String) async {
         let userMessage = ChatMessage(role: .user, content: text, status: .sent)
@@ -130,8 +153,17 @@ public final class ChatViewModel {
 
     private func buildContext() -> [AIMessage] {
         let maxMessages = configuration.maxContextTurns * 2
-        let eligible = messages.filter { $0.role != .system }
-        let trimmed = eligible.suffix(maxMessages)
+        // Exclude system messages and any empty/streaming placeholders so we never send
+        // an empty turn to the provider.
+        let eligible = messages.filter { msg in
+            msg.role != .system && !msg.isStreaming && !msg.content.isEmpty
+        }
+        var trimmed = Array(eligible.suffix(maxMessages))
+        // Providers like Anthropic require the first message to use the user role, so drop
+        // leading assistant turns (e.g. welcome messages).
+        while let first = trimmed.first, first.role == .assistant {
+            trimmed.removeFirst()
+        }
         return trimmed.compactMap { $0.toAIMessage }
     }
 
@@ -144,7 +176,19 @@ public final class ChatViewModel {
             withAnimation(.spring(duration: 0.35)) { isTyping = false }
         }
 
-        var placeholder = ChatMessage(
+        // Bail out if the request was cancelled during the typing-indicator delay (e.g. the
+        // conversation was cleared or the view dismissed) so we don't repopulate messages.
+        if Task.isCancelled {
+            isLoading = false
+            return
+        }
+
+        // Assemble the request context *before* inserting the empty placeholder, so the
+        // placeholder is never sent to the provider as an empty assistant turn.
+        let contextMessages = buildContext()
+        let systemPrompt = buildSystemPrompt()
+
+        let placeholder = ChatMessage(
             role: .assistant,
             content: "",
             status: .sending,
@@ -155,18 +199,15 @@ public final class ChatViewModel {
         }
 
         let placeholderID = placeholder.id
-        guard let placeholderIndex = messages.firstIndex(where: { $0.id == placeholderID }) else {
-            isLoading = false
-            return
-        }
 
         do {
             let stream = try await configuration.provider.engine.streamResponse(
-                messages: buildContext(),
-                systemPrompt: buildSystemPrompt()
+                messages: contextMessages,
+                systemPrompt: systemPrompt
             )
 
             for try await token in stream {
+                try Task.checkCancellation()
                 guard let idx = messages.firstIndex(where: { $0.id == placeholderID }) else { break }
                 messages[idx].content += token
             }
@@ -179,6 +220,8 @@ public final class ChatViewModel {
             }
 
         } catch AIProviderError.contextLengthExceeded where !isRetryingAfterContextTrim {
+            // Trim the oldest turns and retry exactly once. The flag stays set across the
+            // recursive call so a second context-length failure surfaces as an error.
             isRetryingAfterContextTrim = true
             if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
                 messages.remove(at: idx)
@@ -194,10 +237,17 @@ public final class ChatViewModel {
                 }
             }
             isLoading = false
-            isRetryingAfterContextTrim = false
             await streamBotResponse(userText: userText)
             return
 
+        } catch is CancellationError {
+            removePlaceholder(id: placeholderID)
+            isLoading = false
+            return
+        } catch AIProviderError.cancelled {
+            removePlaceholder(id: placeholderID)
+            isLoading = false
+            return
         } catch {
             let errorMessage = (error as? AIProviderError)?.localizedDescription ?? error.localizedDescription
             if let idx = messages.firstIndex(where: { $0.id == placeholderID }) {
@@ -210,5 +260,12 @@ public final class ChatViewModel {
 
         isRetryingAfterContextTrim = false
         isLoading = false
+    }
+
+    /// Removes the streaming placeholder, if still present.
+    private func removePlaceholder(id: UUID) {
+        if let idx = messages.firstIndex(where: { $0.id == id }) {
+            messages.remove(at: idx)
+        }
     }
 }

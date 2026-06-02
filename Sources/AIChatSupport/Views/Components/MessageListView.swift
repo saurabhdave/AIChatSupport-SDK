@@ -13,7 +13,7 @@ struct MessageListView: View {
         ScrollViewReader { proxy in
             ScrollView(.vertical) {
                 LazyVStack(spacing: 0) {
-                    DateHeaderView(date: Date(), theme: theme)
+                    DateHeaderView(date: viewModel.messages.first?.timestamp ?? Date(), theme: theme)
 
                     ForEach(viewModel.messages) { message in
                         if message.role != .system {
@@ -65,7 +65,7 @@ struct MessageListView: View {
                         message: errorMessage,
                         theme: theme,
                         onRetry: {
-                            viewModel.clearError()
+                            viewModel.retryLastFailed()
                         },
                         onDismiss: {
                             withAnimation {
@@ -82,11 +82,19 @@ struct MessageListView: View {
             .onChange(of: viewModel.isTyping) {
                 scrollToBottom(proxy: proxy)
             }
+            .onChange(of: viewModel.messages.last?.content) {
+                // Keep the view pinned to the bottom as streamed tokens grow the last bubble.
+                scrollToBottom(proxy: proxy, animated: false)
+            }
         }
     }
 
-    private func scrollToBottom(proxy: ScrollViewProxy) {
-        withAnimation(.spring(duration: 0.35)) {
+    private func scrollToBottom(proxy: ScrollViewProxy, animated: Bool = true) {
+        if animated {
+            withAnimation(.spring(duration: 0.35)) {
+                proxy.scrollTo(bottomID, anchor: .bottom)
+            }
+        } else {
             proxy.scrollTo(bottomID, anchor: .bottom)
         }
     }
