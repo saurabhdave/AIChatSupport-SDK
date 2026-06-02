@@ -614,4 +614,21 @@ struct JSONConfigTests {
         #expect(Color(hex: "nope") == nil)
         #expect(Color(hex: "#12") == nil)
     }
+
+    @Test("TonePersonality decodes keywords and falls back to .custom")
+    func toneDecoding() throws {
+        let dec = JSONDecoder()
+        #expect(try dec.decode(TonePersonality.self, from: Data("\"friendly\"".utf8)) == .friendly)
+        let custom = try dec.decode(TonePersonality.self, from: Data("\"talk like a pirate\"".utf8))
+        #expect(custom == .custom("talk like a pirate"))
+    }
+
+    @Test("FAQ round-trips question/answer")
+    func faqRoundTrip() throws {
+        let faq = FAQ(question: "Q?", answer: "A.")
+        let data = try JSONEncoder().encode(faq)
+        let back = try JSONDecoder().decode(FAQ.self, from: data)
+        #expect(back.question == "Q?")
+        #expect(back.answer == "A.")
+    }
 }

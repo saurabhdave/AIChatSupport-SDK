@@ -234,3 +234,75 @@ public struct AppContext: Sendable {
         return lines.joined(separator: "\n")
     }
 }
+
+// MARK: - Codable
+
+extension TonePersonality: Codable, Equatable {
+    public init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        switch raw.lowercased() {
+        case "professional": self = .professional
+        case "friendly": self = .friendly
+        case "concise": self = .concise
+        case "technical": self = .technical
+        case "empathetic": self = .empathetic
+        default: self = .custom(raw)
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        switch self {
+        case .professional: try c.encode("professional")
+        case .friendly: try c.encode("friendly")
+        case .concise: try c.encode("concise")
+        case .technical: try c.encode("technical")
+        case .empathetic: try c.encode("empathetic")
+        case .custom(let value): try c.encode(value)
+        }
+    }
+}
+
+extension FAQ: Codable {
+    private enum CodingKeys: String, CodingKey { case question, answer }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(question: try c.decode(String.self, forKey: .question),
+                  answer: try c.decode(String.self, forKey: .answer))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(question, forKey: .question)
+        try c.encode(answer, forKey: .answer)
+    }
+}
+
+extension UserInfo: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case userID, name, email, plan, accountCreatedAt, customAttributes
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            userID: try c.decodeIfPresent(String.self, forKey: .userID),
+            name: try c.decodeIfPresent(String.self, forKey: .name),
+            email: try c.decodeIfPresent(String.self, forKey: .email),
+            plan: try c.decodeIfPresent(String.self, forKey: .plan),
+            accountCreatedAt: try c.decodeIfPresent(Date.self, forKey: .accountCreatedAt),
+            customAttributes: try c.decodeIfPresent([String: String].self, forKey: .customAttributes) ?? [:]
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encodeIfPresent(userID, forKey: .userID)
+        try c.encodeIfPresent(name, forKey: .name)
+        try c.encodeIfPresent(email, forKey: .email)
+        try c.encodeIfPresent(plan, forKey: .plan)
+        try c.encodeIfPresent(accountCreatedAt, forKey: .accountCreatedAt)
+        try c.encode(customAttributes, forKey: .customAttributes)
+    }
+}
