@@ -1,0 +1,29 @@
+{
+  "botName": "ShopEasy Support",
+  "botSubtitle": "Typically replies instantly",
+  "botAvatar": { "type": "sfSymbol", "value": "bag.fill" },
+  "presentationStyle": "sheet",
+  "suggestedPrompts": ["Track my order", "Start a return", "Find my size"],
+  "welcomeMessages": [{ "text": "👋 Hi! How can I help?", "delay": 0.3 }],
+  "themePreset": "light",
+  "brand": {
+    "primaryColor": "#FF6B35",
+    "surfaceColor": "#FAF5F0",
+    "onPrimaryColor": "#FFFFFF",
+    "cornerRadiusStyle": "pill",
+    "headingFontWeight": "bold"
+  },
+  "appContext": {
+    "appName": "ShopEasy",
+    "appDescription": "A curated fashion marketplace for independent designers.",
+    "companyName": "ShopEasy Inc.",
+    "tonePersonality": "friendly",
+    "escalationTriggers": ["speak to a human"],
+    "handoffMessage": "I'll connect you with a ShopEasy team member right away.",
+    "faqs": [
+      { "question": "How do I track my order?", "answer": "Open the Orders tab and tap your order for live tracking." },
+      { "question": "What is the return policy?", "answer": "Free returns within 30 days under Orders ▸ Return Item." }
+    ],
+    "currentUserInfo": { "name": "Jordan", "plan": "Pro", "accountCreatedAt": "2024-03-01T00:00:00Z" }
+  }
+}

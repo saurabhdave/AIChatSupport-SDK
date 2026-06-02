@@ -124,6 +124,46 @@ ContentView()
 
 ---
 
+## Configure from JSON
+
+Load everything except the provider/delegate from a JSON file — a bundled resource, a file URL, or
+raw `Data`:
+
+```swift
+let file = try AIChatConfigurationFile(resource: "ChatConfig")   // ChatConfig.json in your bundle
+let config = file.makeConfiguration(provider: .openAI(OpenAIConfig(apiKey: "…")))
+ContentView().aiChatFloatingButton(configuration: config)
+```
+
+```json
+{
+  "botName": "ShopEasy Support",
+  "botSubtitle": "Typically replies instantly",
+  "botAvatar": { "type": "sfSymbol", "value": "bag.fill" },
+  "presentationStyle": "sheet",
+  "suggestedPrompts": ["Track my order", "Start a return"],
+  "welcomeMessages": [{ "text": "👋 Hi! How can I help?", "delay": 0.3 }],
+  "themePreset": "light",
+  "brand": { "primaryColor": "#FF6B35", "surfaceColor": "#FAF5F0", "cornerRadiusStyle": "pill", "headingFontWeight": "bold" },
+  "appContext": {
+    "appName": "ShopEasy",
+    "appDescription": "A curated fashion marketplace.",
+    "tonePersonality": "friendly",
+    "escalationTriggers": ["speak to a human"],
+    "faqs": [{ "question": "How do I track my order?", "answer": "Open the Orders tab." }],
+    "currentUserInfo": { "name": "Jordan", "plan": "Pro", "accountCreatedAt": "2024-03-01T00:00:00Z" }
+  }
+}
+```
+
+Every field is optional and falls back to the same defaults as `AIChatConfiguration`. Notes:
+- The **provider stays in code** — don't ship API keys in a bundled file.
+- `tonePersonality` is a keyword (`professional`/`friendly`/`concise`/`technical`/`empathetic`) or any
+  other string for a custom tone; `themePreset` is `light`/`dark`/`minimal`; colors are hex; dates are
+  ISO-8601.
+
+---
+
 ## AppContext Example — "ShopEasy"
 
 ```swift
