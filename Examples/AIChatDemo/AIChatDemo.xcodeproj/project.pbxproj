@@ -259,6 +259,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		1A0000000000000000000011 /* AIChatSupport */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 1A0000000000000000000010 /* XCLocalSwiftPackageReference "../.." */;
 			productName = AIChatSupport;
 		};
 /* End XCSwiftPackageProductDependency section */
