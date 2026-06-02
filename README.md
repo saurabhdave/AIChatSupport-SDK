@@ -1,5 +1,7 @@
 # AIChatSupport
 
+[![CI](https://github.com/saurabhdave/AIChatSupport-SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/saurabhdave/AIChatSupport-SDK/actions/workflows/ci.yml)
+
 A production-grade, plug-and-play SwiftUI AI Chat Support SDK for iOS.  
 Drop in a floating button or a full chat screen with **3 lines of code** — no backend required.
 

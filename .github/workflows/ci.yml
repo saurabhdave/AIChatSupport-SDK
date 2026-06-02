@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Test (iOS Simulator)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.0'
+
+      - name: Environment
+        run: |
+          xcodebuild -version
+          xcrun simctl list runtimes | grep iOS
+
+      - name: Test
+        run: |
+          set -o pipefail
+          DEVICE_ID=$(xcrun simctl list devices available --json \
+            | jq -r '[.devices[][] | select(.name | test("iPhone"))][0].udid')
+          echo "Using simulator $DEVICE_ID"
+          xcodebuild test \
+            -scheme AIChatSupport \
+            -destination "id=$DEVICE_ID" \
+            -skipPackagePluginValidation
