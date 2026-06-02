@@ -296,6 +296,162 @@ struct ChatViewModelTests {
     }
 }
 
+// MARK: – Context Assembly Tests
+
+/// A provider that records every (messages, systemPrompt) pair it is asked to stream,
+/// so tests can assert on the exact wire payload the view model builds.
+final class CapturingProvider: AIProviderProtocol, @unchecked Sendable {
+    private let lock = NSLock()
+    private var _capturedMessages: [[AIMessage]] = []
+    private var _capturedSystemPrompts: [String] = []
+    private let response: String
+
+    init(response: String = "ok") { self.response = response }
+
+    var capturedMessages: [[AIMessage]] { lock.withLock { _capturedMessages } }
+    var capturedSystemPrompts: [String] { lock.withLock { _capturedSystemPrompts } }
+
+    func streamResponse(
+        messages: [AIMessage],
+        systemPrompt: String
+    ) async throws(AIProviderError) -> AsyncThrowingStream<String, any Error> {
+        lock.withLock {
+            _capturedMessages.append(messages)
+            _capturedSystemPrompts.append(systemPrompt)
+        }
+        let text = response
+        return AsyncThrowingStream { continuation in
+            continuation.yield(text)
+            continuation.finish()
+        }
+    }
+}
+
+@Suite("ChatViewModel context assembly")
+@MainActor
+struct ContextAssemblyTests {
+
+    @Test("First turn never sends an empty assistant placeholder and starts with the user role")
+    func firstTurnExcludesPlaceholderAndLeadingWelcome() async throws {
+        let capture = CapturingProvider()
+        let config = AIChatConfiguration(
+            provider: .custom(capture),
+            welcomeMessages: [WelcomeMessage(text: "Hi there!", delay: 0)],
+            showTypingIndicator: false
+        )
+        let vm = ChatViewModel(configuration: config)
+        await vm.onAppear() // delivers the assistant welcome message
+
+        vm.inputText = "Hello"
+        vm.sendMessage()
+        try await Task.sleep(for: .milliseconds(200))
+
+        let sent = try #require(capture.capturedMessages.first)
+        // No empty turns reach the provider.
+        #expect(sent.allSatisfy { !$0.content.isEmpty })
+        // The leading assistant welcome message is dropped; the first message is the user's.
+        #expect(sent.first?.role == .user)
+        #expect(sent.contains { $0.role == .user && $0.content == "Hello" })
+    }
+
+    @Test("Second turn includes the prior assistant reply and still starts with user")
+    func secondTurnIncludesPriorAssistant() async throws {
+        let capture = CapturingProvider(response: "first reply")
+        let config = AIChatConfiguration(
+            provider: .custom(capture),
+            welcomeMessages: [],
+            showTypingIndicator: false
+        )
+        let vm = ChatViewModel(configuration: config)
+
+        vm.inputText = "First"
+        vm.sendMessage()
+        try await Task.sleep(for: .milliseconds(200))
+
+        vm.inputText = "Second"
+        vm.sendMessage()
+        try await Task.sleep(for: .milliseconds(200))
+
+        let secondPayload = try #require(capture.capturedMessages.last)
+        #expect(secondPayload.first?.role == .user)
+        #expect(secondPayload.contains { $0.role == .assistant && $0.content == "first reply" })
+        #expect(secondPayload.contains { $0.role == .user && $0.content == "Second" })
+        #expect(secondPayload.allSatisfy { !$0.content.isEmpty })
+    }
+
+    @Test("System prompt carries the AppContext block")
+    func systemPromptIncludesAppContext() async throws {
+        let capture = CapturingProvider()
+        let config = AIChatConfiguration(
+            provider: .custom(capture),
+            appContext: AppContext(appName: "ShopEasy", appDescription: "A marketplace."),
+            welcomeMessages: [],
+            showTypingIndicator: false
+        )
+        let vm = ChatViewModel(configuration: config)
+        vm.inputText = "Hello"
+        vm.sendMessage()
+        try await Task.sleep(for: .milliseconds(200))
+
+        let prompt = try #require(capture.capturedSystemPrompts.first)
+        #expect(prompt.contains("[PRODUCT CONTEXT]"))
+        #expect(prompt.contains("ShopEasy"))
+    }
+
+    @Test("A failed response marks the message failed and surfaces an error")
+    func failedResponseSetsError() async throws {
+        let config = AIChatConfiguration(
+            provider: .mock(MockAIConfig(streamDelay: 0, tokenDelay: 0, shouldFail: true)),
+            welcomeMessages: [],
+            showTypingIndicator: false
+        )
+        let vm = ChatViewModel(configuration: config)
+        vm.inputText = "Hello"
+        vm.sendMessage()
+        try await Task.sleep(for: .milliseconds(200))
+
+        #expect(vm.error != nil)
+        #expect(vm.messages.contains { $0.isFailed })
+    }
+
+    @Test("clearConversation resets loading and empties messages")
+    func clearConversationResetsState() async throws {
+        let config = AIChatConfiguration(
+            provider: .mock(MockAIConfig(streamDelay: 5, tokenDelay: 0)),
+            welcomeMessages: [],
+            showTypingIndicator: false
+        )
+        let vm = ChatViewModel(configuration: config)
+        vm.inputText = "Hello"
+        vm.sendMessage()
+        try await Task.sleep(for: .milliseconds(50))
+        vm.clearConversation()
+
+        #expect(vm.messages.isEmpty)
+        #expect(vm.isLoading == false)
+    }
+}
+
+// MARK: – AppContext identity edge case
+
+@Suite("AppContext identity line")
+struct AppContextIdentityTests {
+
+    @Test("companyName is kept even when appName is empty")
+    func companyKeptWithoutAppName() {
+        let context = AppContext(appName: "", appDescription: "Desc.", companyName: "Acme Inc.")
+        let block = context.buildSystemPromptBlock()
+        #expect(block.contains("Acme Inc."))
+    }
+
+    @Test("appName and companyName combine as 'App by Company'")
+    func appAndCompanyCombine() {
+        let context = AppContext(appName: "ShopEasy", appDescription: "Desc.", companyName: "ShopEasy Inc.")
+        let block = context.buildSystemPromptBlock()
+        #expect(block.contains("ShopEasy by ShopEasy Inc."))
+    }
+}
+
 // MARK: – MockAIProvider Tests
 
 @Suite("MockAIProvider")
