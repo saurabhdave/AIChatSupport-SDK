@@ -34,8 +34,12 @@ public struct WelcomeMessage: Identifiable, Sendable {
 }
 
 /// Receives lifecycle events from the chat session.
+///
+/// The protocol is `@MainActor`-isolated and refines `Sendable` so it can be stored in the
+/// `Sendable` ``AIChatConfiguration`` without an unsafe escape hatch. Conforming reference types
+/// are main-actor isolated, which provides the required synchronization.
 @MainActor
-public protocol AIChatDelegate: AnyObject {
+public protocol AIChatDelegate: AnyObject, Sendable {
     func chatDidSendMessage(_ message: String)
     func chatDidReceiveResponse(_ response: String)
     func chatDidEncounterError(_ error: any Error)
@@ -103,9 +107,8 @@ public struct AIChatConfiguration: Sendable {
 
     // MARK: – Lifecycle
 
-    /// Lifecycle delegate. Marked nonisolated(unsafe) because AIChatDelegate is @MainActor-constrained
-    /// and only ever accessed from the main actor in ChatViewModel — the type system cannot prove this automatically.
-    public nonisolated(unsafe) var delegate: (any AIChatDelegate)?
+    /// Lifecycle delegate, invoked on the main actor.
+    public var delegate: (any AIChatDelegate)?
 
     public init(
         provider: AIProvider,

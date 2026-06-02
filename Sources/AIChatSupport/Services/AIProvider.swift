@@ -91,14 +91,14 @@ public struct OpenAIConfig: Sendable {
 /// Configuration for the Anthropic Messages API.
 public struct AnthropicConfig: Sendable {
     public var apiKey: String
-    /// Default: "claude-opus-4-5"
+    /// Default: "claude-opus-4-8"
     public var model: String
     /// Default: 1024
     public var maxTokens: Int
 
     public init(
         apiKey: String,
-        model: String = "claude-opus-4-5",
+        model: String = "claude-opus-4-8",
         maxTokens: Int = 1024
     ) {
         self.apiKey = apiKey

@@ -159,11 +159,14 @@ public struct AppContext: Sendable {
         if !allEmpty {
             lines.append("[PRODUCT CONTEXT]")
 
-            var appLine = "App: \(appName)"
+            var identityParts: [String] = []
+            if !appName.isEmpty { identityParts.append(appName) }
             if let company = companyName, !company.isEmpty {
-                appLine += " by \(company)"
+                identityParts.append(identityParts.isEmpty ? company : "by \(company)")
             }
-            if !appName.isEmpty { lines.append(appLine) }
+            if !identityParts.isEmpty {
+                lines.append("App: \(identityParts.joined(separator: " "))")
+            }
 
             if !appDescription.isEmpty { lines.append("Description: \(appDescription)") }
             if let v = appVersion { lines.append("Version: \(v)") }
