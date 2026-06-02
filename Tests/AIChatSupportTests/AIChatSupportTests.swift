@@ -681,4 +681,54 @@ struct JSONConfigTests {
         #expect(custom.bubbleRadius == 12)
         #expect(custom.inputRadius == 16)
     }
+
+    @MainActor
+    @Test("Full JSON builds a configuration; provider stays in code")
+    func fileMakesConfiguration() throws {
+        let json = Data(#"""
+        {
+          "botName": "ShopEasy Support",
+          "botAvatar": { "type": "sfSymbol", "value": "bag.fill" },
+          "presentationStyle": "fullScreen",
+          "suggestedPrompts": ["Track my order", "Start a return"],
+          "welcomeMessages": [{ "text": "Hi!", "delay": 0.2 }],
+          "systemPrompt": "Be concise.",
+          "enableFeedback": false,
+          "themePreset": "light",
+          "brand": { "primaryColor": "#FF6B35", "cornerRadiusStyle": "pill", "headingFontWeight": "bold" },
+          "appContext": { "appName": "ShopEasy", "tonePersonality": "friendly" }
+        }
+        """#.utf8)
+        let file = try AIChatConfigurationFile(data: json)
+        let config = file.makeConfiguration(provider: .mock(MockAIConfig()))
+
+        #expect(config.botName == "ShopEasy Support")
+        #expect(config.presentationStyle == .fullScreen)
+        #expect(config.suggestedPrompts == ["Track my order", "Start a return"])
+        #expect(config.welcomeMessages.count == 1)
+        #expect(config.systemPrompt == "Be concise.")
+        #expect(config.enableFeedback == false)
+        #expect(config.appContext.appName == "ShopEasy")
+        #expect(config.hostAppTheme?.brandPrimaryColor != nil)
+        let resolved = config.theme.resolved(hostTheme: config.hostAppTheme)
+        #expect(resolved.userBubbleColor == Color(hex: "#FF6B35"))
+        #expect(resolved.bubbleCornerRadius == 99)
+    }
+
+    @MainActor
+    @Test("Minimal JSON works with defaults")
+    func fileMinimal() throws {
+        let file = try AIChatConfigurationFile(data: Data(#"{ "appContext": { "appName": "X" } }"#.utf8))
+        let config = file.makeConfiguration(provider: .mock(MockAIConfig()))
+        #expect(config.botName == "Support")
+        #expect(config.presentationStyle == .sheet)
+        #expect(config.appContext.appName == "X")
+    }
+
+    @Test("Malformed JSON throws")
+    func fileMalformed() {
+        #expect(throws: (any Error).self) {
+            _ = try AIChatConfigurationFile(data: Data("not json".utf8))
+        }
+    }
 }
