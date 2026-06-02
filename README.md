@@ -261,6 +261,12 @@ myView.aiChatInline(configuration: config)
 
 ---
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes, including breaking changes.
+
+---
+
 ## License
 
 MIT
