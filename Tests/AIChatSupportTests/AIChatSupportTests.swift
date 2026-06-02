@@ -599,3 +599,19 @@ struct ChatMessageTests {
         #expect(msg.toAIMessage?.content == "Hello, world!")
     }
 }
+
+// MARK: – JSON configuration
+
+@Suite("JSON configuration")
+struct JSONConfigTests {
+
+    @Test("Color(hex:) parses #RGB, #RRGGBB, #RRGGBBAA and rejects junk")
+    func colorHexParsing() {
+        #expect(Color(hex: "#FFFFFF") != nil)
+        #expect(Color(hex: "FFF") != nil)
+        #expect(Color(hex: "#FF6B35") != nil)
+        #expect(Color(hex: "#FF6B3580") != nil)
+        #expect(Color(hex: "nope") == nil)
+        #expect(Color(hex: "#12") == nil)
+    }
+}
