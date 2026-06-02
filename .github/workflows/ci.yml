@@ -25,10 +25,19 @@ jobs:
       - name: Test
         run: |
           set -o pipefail
-          DEVICE_ID=$(xcrun simctl list devices available --json \
-            | jq -r '[.devices[][] | select(.name | test("iPhone"))][0].udid')
-          echo "Using simulator $DEVICE_ID"
+          # Pick a valid iOS Simulator destination from xcodebuild's own list (not simctl),
+          # so the id is guaranteed to be one the scheme accepts.
+          echo "iOS Simulator destinations:"
+          xcodebuild -scheme AIChatSupport -showdestinations 2>/dev/null \
+            | grep 'platform:iOS Simulator' | grep -v placeholder || true
+          DEST_ID=$(xcodebuild -scheme AIChatSupport -showdestinations 2>/dev/null \
+            | grep 'platform:iOS Simulator' \
+            | grep -v placeholder \
+            | grep -oE 'id:[0-9A-Fa-f-]+' \
+            | head -1 | cut -d: -f2)
+          if [ -z "$DEST_ID" ]; then echo "::error::No iOS Simulator destination found"; exit 1; fi
+          echo "Using destination id: $DEST_ID"
           xcodebuild test \
             -scheme AIChatSupport \
-            -destination "id=$DEVICE_ID" \
+            -destination "id=$DEST_ID" \
             -skipPackagePluginValidation
