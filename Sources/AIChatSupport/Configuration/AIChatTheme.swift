@@ -43,6 +43,12 @@ public struct AIChatTheme: Sendable {
     public var inputFontSize: CGFloat
     /// nil = system font.
     public var preferredFontFamily: String?
+    /// Weight for the header bot name. Default: .semibold.
+    public var headingFontWeight: Font.Weight
+    /// Weight for message-bubble and input text. Default: .regular.
+    public var bodyFontWeight: Font.Weight
+    /// When true, the chat honors the system Dynamic Type setting. Default: true.
+    public var usesDynamicType: Bool
 
     // MARK: – Shape
 
@@ -235,6 +241,13 @@ public struct AIChatTheme: Sendable {
             base.messageFontSize = size
             base.inputFontSize = size
         }
+        if let weight = host.headingFontWeight {
+            base.headingFontWeight = weight
+        }
+        if let weight = host.bodyFontWeight {
+            base.bodyFontWeight = weight
+        }
+        base.usesDynamicType = host.usesDynamicType
 
         base.prefersBorderedInput = host.prefersBorderedInput
         base.reducedMotion = host.reducedMotion
@@ -272,6 +285,9 @@ public struct AIChatTheme: Sendable {
         headerSubtitleFontSize: CGFloat = 13,
         inputFontSize: CGFloat = 16,
         preferredFontFamily: String? = nil,
+        headingFontWeight: Font.Weight = .semibold,
+        bodyFontWeight: Font.Weight = .regular,
+        usesDynamicType: Bool = true,
         bubbleCornerRadius: CGFloat = 18,
         inputCornerRadius: CGFloat = 24,
         avatarSize: CGFloat = 36,
@@ -308,6 +324,9 @@ public struct AIChatTheme: Sendable {
         self.headerSubtitleFontSize = headerSubtitleFontSize
         self.inputFontSize = inputFontSize
         self.preferredFontFamily = preferredFontFamily
+        self.headingFontWeight = headingFontWeight
+        self.bodyFontWeight = bodyFontWeight
+        self.usesDynamicType = usesDynamicType
         self.bubbleCornerRadius = bubbleCornerRadius
         self.inputCornerRadius = inputCornerRadius
         self.avatarSize = avatarSize

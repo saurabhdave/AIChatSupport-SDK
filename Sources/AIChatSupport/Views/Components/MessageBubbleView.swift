@@ -90,9 +90,9 @@ struct MessageBubbleView: View {
 
         VStack(alignment: .leading, spacing: 4) {
             Text(content)
-                .font(theme.preferredFontFamily.map {
+                .font((theme.preferredFontFamily.map {
                     Font.custom($0, size: theme.messageFontSize)
-                } ?? Font.system(size: theme.messageFontSize))
+                } ?? Font.system(size: theme.messageFontSize)).weight(theme.bodyFontWeight))
                 .foregroundStyle(textColor)
                 .textSelection(.enabled)
                 .fixedSize(horizontal: false, vertical: true)

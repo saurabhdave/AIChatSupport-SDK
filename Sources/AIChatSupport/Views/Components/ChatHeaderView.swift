@@ -29,9 +29,9 @@ struct ChatHeaderView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(configuration.botName)
-                    .font(theme.preferredFontFamily.map {
+                    .font((theme.preferredFontFamily.map {
                         Font.custom($0, size: theme.headerTitleFontSize)
-                    } ?? Font.system(size: theme.headerTitleFontSize, weight: .semibold))
+                    } ?? Font.system(size: theme.headerTitleFontSize)).weight(theme.headingFontWeight))
                     .foregroundStyle(theme.headerTextColor)
 
                 if let subtitle = configuration.botSubtitle {
