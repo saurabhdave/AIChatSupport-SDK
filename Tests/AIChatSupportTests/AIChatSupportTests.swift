@@ -203,6 +203,21 @@ struct AIChatThemeTests {
         let resolved = AIChatTheme.light.resolved(hostTheme: hostTheme)
         #expect(resolved.prefersBorderedInput == true)
     }
+
+    @Test("Presets carry the expected color scheme")
+    func presetColorSchemes() {
+        #expect(AIChatTheme.light.colorScheme == .light)
+        #expect(AIChatTheme.dark.colorScheme == .dark)
+        #expect(AIChatTheme.minimal.colorScheme == .light)
+    }
+
+    @Test("prefersDarkMode pins the resolved color scheme")
+    func prefersDarkModePinsScheme() {
+        #expect(AIChatTheme.light.resolved(hostTheme: HostAppTheme(prefersDarkMode: true)).colorScheme == .dark)
+        #expect(AIChatTheme.dark.resolved(hostTheme: HostAppTheme(prefersDarkMode: false)).colorScheme == .light)
+        // nil leaves the base theme's scheme untouched.
+        #expect(AIChatTheme.light.resolved(hostTheme: HostAppTheme(brandPrimaryColor: .red)).colorScheme == .light)
+    }
 }
 
 // MARK: – ChatViewModel Tests

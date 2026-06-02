@@ -68,6 +68,13 @@ public struct AIChatTheme: Sendable {
     /// Default: false. Set to true to disable animations.
     public var reducedMotion: Bool
 
+    // MARK: – Appearance
+
+    /// The color scheme the chat renders in. Pins how system (dynamic) colors resolve so a theme
+    /// looks the same regardless of the device's light/dark setting. The light/minimal presets use
+    /// `.light` and the dark preset uses `.dark`; `HostAppTheme.prefersDarkMode` overrides it.
+    public var colorScheme: ColorScheme
+
     // MARK: – Presets
 
     public static var `default`: AIChatTheme { .light }
@@ -148,7 +155,8 @@ public struct AIChatTheme: Sendable {
             avatarSize: 36,
             messageSpacing: 4,
             prefersBorderedInput: false,
-            reducedMotion: false
+            reducedMotion: false,
+            colorScheme: .dark
         )
     }
 
@@ -204,6 +212,10 @@ public struct AIChatTheme: Sendable {
         guard let host = hostTheme else { return self }
 
         var base = host.prefersDarkMode == true ? AIChatTheme.dark : self
+        // Force the matching scheme when the host pins light/dark; otherwise keep the base's.
+        if host.prefersDarkMode == false {
+            base.colorScheme = .light
+        }
 
         if let primary = host.brandPrimaryColor {
             base.primaryColor = primary
@@ -293,7 +305,8 @@ public struct AIChatTheme: Sendable {
         avatarSize: CGFloat = 36,
         messageSpacing: CGFloat = 4,
         prefersBorderedInput: Bool = false,
-        reducedMotion: Bool = false
+        reducedMotion: Bool = false,
+        colorScheme: ColorScheme = .light
     ) {
         self.primaryColor = primaryColor
         self.backgroundColor = backgroundColor
@@ -333,5 +346,6 @@ public struct AIChatTheme: Sendable {
         self.messageSpacing = messageSpacing
         self.prefersBorderedInput = prefersBorderedInput
         self.reducedMotion = reducedMotion
+        self.colorScheme = colorScheme
     }
 }

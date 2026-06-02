@@ -49,6 +49,7 @@ public struct ChatView: View {
             }
         }
         .background(theme.backgroundColor.ignoresSafeArea())
+        .environment(\.colorScheme, theme.colorScheme)
         .dynamicTypeSize(theme.usesDynamicType ? .xSmall ... .accessibility3 : .large ... .large)
         .task {
             await viewModel.onAppear()
