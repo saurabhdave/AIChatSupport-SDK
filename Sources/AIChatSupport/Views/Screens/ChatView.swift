@@ -7,6 +7,7 @@ public struct ChatView: View {
     let isModal: Bool
 
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.dismiss) private var dismiss
 
     public init(configuration: AIChatConfiguration, isModal: Bool = false) {
         self.configuration = configuration
@@ -22,7 +23,11 @@ public struct ChatView: View {
                 configuration: configuration,
                 theme: theme,
                 isModal: isModal,
-                onDismiss: { configuration.delegate?.chatDidDismiss() },
+                onDismiss: {
+                    // Dismiss the sheet/cover; the launcher's onDismiss fires chatDidDismiss.
+                    viewModel.cancel()
+                    dismiss()
+                },
                 onClearConversation: { viewModel.clearConversation() }
             )
 
