@@ -17,6 +17,8 @@ struct DemoPersona: Identifiable {
     let welcomeMessages: [WelcomeMessage]
     /// Brand tokens used by the "Branded theme" demo.
     let brandTheme: HostAppTheme
+    /// The AI backend for this domain. Defaults to the shared (mock/env-opt-in) backend.
+    var provider: AIProvider = DemoBackend.provider
 
     func makeConfiguration(
         hostAppTheme: HostAppTheme? = nil,
@@ -24,7 +26,7 @@ struct DemoPersona: Identifiable {
         delegate: (any AIChatDelegate)? = nil
     ) -> AIChatConfiguration {
         AIChatConfiguration(
-            provider: DemoBackend.provider,
+            provider: provider,
             botName: botName,
             botSubtitle: botSubtitle,
             botAvatarStyle: .sfSymbol(avatarSystemImage),
@@ -126,5 +128,32 @@ extension DemoPersona {
             headingFontWeight: .bold,
             cornerRadiusStyle: .rounded
         )
+    )
+
+    /// On-device assistant powered by Apple's Foundation Models — runs locally, no API key.
+    static let onDevice = DemoPersona(
+        id: "ondevice",
+        tabTitle: "On-Device",
+        tabSystemImage: "cpu",
+        botName: "On-Device Assistant",
+        botSubtitle: "Runs privately on this device",
+        avatarSystemImage: "cpu",
+        appContext: AppContext(
+            appName: "AIChatSupport",
+            appDescription: "A SwiftUI AI chat SDK demo running an on-device model.",
+            tonePersonality: .concise
+        ),
+        suggestedPrompts: ["Write a haiku about Swift", "Brainstorm app names", "Summarize the idea of SwiftUI"],
+        welcomeMessages: [
+            WelcomeMessage(text: "🔒 Hi! I run entirely on your device — no network, no API key. Ask me anything.", delay: 0.3)
+        ],
+        brandTheme: HostAppTheme(
+            brandPrimaryColor: Color(red: 0.35, green: 0.34, blue: 0.84),
+            brandSurfaceColor: Color(red: 0.96, green: 0.96, blue: 0.99),
+            brandOnPrimaryColor: .white,
+            headingFontWeight: .bold,
+            cornerRadiusStyle: .rounded
+        ),
+        provider: .custom(OnDeviceModelProvider())
     )
 }

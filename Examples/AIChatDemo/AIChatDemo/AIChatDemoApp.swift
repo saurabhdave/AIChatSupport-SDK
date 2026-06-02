@@ -11,6 +11,9 @@ struct AIChatDemoApp: App {
                 Tab(DemoPersona.wanderly.tabTitle, systemImage: DemoPersona.wanderly.tabSystemImage) {
                     ShowcaseHomeView(persona: .wanderly)
                 }
+                Tab(DemoPersona.onDevice.tabTitle, systemImage: DemoPersona.onDevice.tabSystemImage) {
+                    ShowcaseHomeView(persona: .onDevice)
+                }
             }
         }
     }
