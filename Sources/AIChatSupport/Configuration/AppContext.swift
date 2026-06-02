@@ -306,3 +306,61 @@ extension UserInfo: Codable {
         try c.encode(customAttributes, forKey: .customAttributes)
     }
 }
+
+extension AppContext: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case appName, appDescription, appVersion, companyName, websiteURL, supportEmail,
+             supportPhoneNumber, productCategories, primaryUseCases, keyFeatures, pricingInfo,
+             targetAudience, doNotDiscussList, escalationTriggers, handoffMessage,
+             responseLanguage, tonePersonality, faqs, currentUserInfo
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            appName: try c.decodeIfPresent(String.self, forKey: .appName) ?? "",
+            appDescription: try c.decodeIfPresent(String.self, forKey: .appDescription) ?? "",
+            appVersion: try c.decodeIfPresent(String.self, forKey: .appVersion),
+            companyName: try c.decodeIfPresent(String.self, forKey: .companyName),
+            websiteURL: try c.decodeIfPresent(String.self, forKey: .websiteURL),
+            supportEmail: try c.decodeIfPresent(String.self, forKey: .supportEmail),
+            supportPhoneNumber: try c.decodeIfPresent(String.self, forKey: .supportPhoneNumber),
+            productCategories: try c.decodeIfPresent([String].self, forKey: .productCategories) ?? [],
+            primaryUseCases: try c.decodeIfPresent([String].self, forKey: .primaryUseCases) ?? [],
+            keyFeatures: try c.decodeIfPresent([String].self, forKey: .keyFeatures) ?? [],
+            pricingInfo: try c.decodeIfPresent(String.self, forKey: .pricingInfo),
+            targetAudience: try c.decodeIfPresent(String.self, forKey: .targetAudience),
+            doNotDiscussList: try c.decodeIfPresent([String].self, forKey: .doNotDiscussList) ?? [],
+            escalationTriggers: try c.decodeIfPresent([String].self, forKey: .escalationTriggers) ?? [],
+            handoffMessage: try c.decodeIfPresent(String.self, forKey: .handoffMessage)
+                ?? "Let me connect you with a team member who can help.",
+            responseLanguage: try c.decodeIfPresent(String.self, forKey: .responseLanguage) ?? "en-US",
+            tonePersonality: try c.decodeIfPresent(TonePersonality.self, forKey: .tonePersonality) ?? .friendly,
+            faqs: try c.decodeIfPresent([FAQ].self, forKey: .faqs) ?? [],
+            currentUserInfo: try c.decodeIfPresent(UserInfo.self, forKey: .currentUserInfo)
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(appName, forKey: .appName)
+        try c.encode(appDescription, forKey: .appDescription)
+        try c.encodeIfPresent(appVersion, forKey: .appVersion)
+        try c.encodeIfPresent(companyName, forKey: .companyName)
+        try c.encodeIfPresent(websiteURL, forKey: .websiteURL)
+        try c.encodeIfPresent(supportEmail, forKey: .supportEmail)
+        try c.encodeIfPresent(supportPhoneNumber, forKey: .supportPhoneNumber)
+        try c.encode(productCategories, forKey: .productCategories)
+        try c.encode(primaryUseCases, forKey: .primaryUseCases)
+        try c.encode(keyFeatures, forKey: .keyFeatures)
+        try c.encodeIfPresent(pricingInfo, forKey: .pricingInfo)
+        try c.encodeIfPresent(targetAudience, forKey: .targetAudience)
+        try c.encode(doNotDiscussList, forKey: .doNotDiscussList)
+        try c.encode(escalationTriggers, forKey: .escalationTriggers)
+        try c.encode(handoffMessage, forKey: .handoffMessage)
+        try c.encode(responseLanguage, forKey: .responseLanguage)
+        try c.encode(tonePersonality, forKey: .tonePersonality)
+        try c.encode(faqs, forKey: .faqs)
+        try c.encodeIfPresent(currentUserInfo, forKey: .currentUserInfo)
+    }
+}

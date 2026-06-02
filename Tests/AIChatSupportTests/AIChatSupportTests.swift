@@ -631,4 +631,30 @@ struct JSONConfigTests {
         #expect(back.question == "Q?")
         #expect(back.answer == "A.")
     }
+
+    @Test("AppContext decodes leniently — omitted fields use defaults")
+    func appContextLenient() throws {
+        let json = Data(#"{ "appName": "MyApp" }"#.utf8)
+        let ctx = try JSONDecoder().decode(AppContext.self, from: json)
+        #expect(ctx.appName == "MyApp")
+        #expect(ctx.responseLanguage == "en-US")
+        #expect(ctx.tonePersonality == .friendly)
+        #expect(ctx.faqs.isEmpty)
+    }
+
+    @Test("AppContext round-trips full content")
+    func appContextRoundTrip() throws {
+        let ctx = AppContext(
+            appName: "ShopEasy", appDescription: "A shop.",
+            escalationTriggers: ["speak to a human"], handoffMessage: "Hold on.",
+            tonePersonality: .custom("playful"),
+            faqs: [FAQ(question: "Q?", answer: "A.")]
+        )
+        let data = try JSONEncoder().encode(ctx)
+        let back = try JSONDecoder().decode(AppContext.self, from: data)
+        #expect(back.appName == "ShopEasy")
+        #expect(back.tonePersonality == .custom("playful"))
+        #expect(back.faqs.first?.question == "Q?")
+        #expect(back.handoffMessage == "Hold on.")
+    }
 }
