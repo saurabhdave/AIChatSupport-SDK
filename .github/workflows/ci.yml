@@ -9,6 +9,7 @@ jobs:
   test:
     name: Test (iOS Simulator)
     runs-on: macos-15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
 
@@ -45,6 +46,7 @@ jobs:
   example:
     name: Build example app
     runs-on: macos-15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
 
@@ -56,13 +58,9 @@ jobs:
       - name: Build
         run: |
           set -o pipefail
-          DEST_ID=$(xcodebuild -project Examples/AIChatDemo/AIChatDemo.xcodeproj \
-            -scheme AIChatDemo -showdestinations 2>/dev/null \
-            | grep 'platform:iOS Simulator' | grep -v placeholder \
-            | grep -oE 'id:[0-9A-Fa-f-]+' | head -1 | cut -d: -f2)
-          if [ -z "$DEST_ID" ]; then echo "::error::No iOS Simulator destination found"; exit 1; fi
-          echo "Using destination id: $DEST_ID"
+          # A build (no tests) only needs the simulator SDK, so a generic destination is
+          # the most robust choice — no booted device required.
           xcodebuild build \
             -project Examples/AIChatDemo/AIChatDemo.xcodeproj \
             -scheme AIChatDemo \
-            -destination "id=$DEST_ID"
+            -destination 'generic/platform=iOS Simulator'
