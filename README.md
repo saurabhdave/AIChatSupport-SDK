@@ -273,6 +273,12 @@ and the lifecycle delegate.
 Two tab-bar domains — an **e-commerce** assistant (ShopEasy) and a **travel concierge** (Wanderly)
 — show the same SDK adapting its identity, prompts, knowledge, and brand to any context.
 
+| Showcase home | E-commerce chat | Travel chat | Branded theme |
+|---|---|---|---|
+| <img src="Examples/AIChatDemo/Screenshots/01-home.png" width="200" alt="Showcase home with ShopEasy and Wanderly tabs"> | <img src="Examples/AIChatDemo/Screenshots/02-shopeasy-chat.png" width="200" alt="ShopEasy e-commerce chat"> | <img src="Examples/AIChatDemo/Screenshots/03-wanderly-chat.png" width="200" alt="Wanderly travel chat"> | <img src="Examples/AIChatDemo/Screenshots/04-wanderly-branded.png" width="200" alt="Wanderly branded theme"> |
+
+_Captured on iOS 26 Simulator. The chat stays light even with the device in Dark Mode because the theme pins its own color scheme._
+
 It runs on the **mock provider** out of the box — no API key needed. To try live streaming, set
 `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` in the Run scheme's environment
 (**Product ▸ Scheme ▸ Edit Scheme… ▸ Run ▸ Arguments ▸ Environment Variables**).
