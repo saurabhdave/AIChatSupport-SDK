@@ -6,3 +6,7 @@
 DerivedData/
 .swiftpm/
 docs/superpowers/
+
+# The example app ships a committed Xcode project; the *.xcodeproj/ rule above targets
+# generated package projects, so re-include this one explicitly.
+!Examples/AIChatDemo/AIChatDemo.xcodeproj/
