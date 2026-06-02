@@ -10,8 +10,8 @@ Drop in a floating button or a full chat screen with **3 lines of code** — no 
 | Requirement | Version |
 |---|---|
 | iOS | 26+ |
-| Swift | 5.10+ (Swift 6 strict concurrency) |
-| Xcode | 16+ |
+| Swift | 6.2+ (Swift 6 language mode, strict concurrency) |
+| Xcode | 26+ |
 
 Zero third-party dependencies.
 
@@ -167,9 +167,11 @@ config.hostAppTheme = hostTheme
 | Provider | Case | Notes |
 |---|---|---|
 | OpenAI | `.openAI(OpenAIConfig(...))` | GPT-4o default; SSE streaming |
-| Anthropic | `.anthropic(AnthropicConfig(...))` | Claude Opus 4.5 default; SSE streaming |
+| Anthropic | `.anthropic(AnthropicConfig(...))` | Claude Opus 4.8 default; SSE streaming |
 | Custom | `.custom(MyProvider())` | Conform to `AIProviderProtocol` |
 | Mock | `.mock(MockAIConfig(...))` | For development and testing; no API key needed |
+
+> ⚠️ **Security — do not ship provider API keys in production.** The `.openAI` and `.anthropic` providers call the vendor API directly from the device, which means any key you pass is embedded in your app binary and can be extracted. Use them for prototyping only. **For production, route requests through your own backend and use `.custom(...)`** to point the SDK at your proxy endpoint — your server holds the secret key and the app never sees it.
 
 ---
 
@@ -194,8 +196,11 @@ let theme = AIChatTheme.custom { t in
 
 ## Delegate Usage
 
+`AIChatDelegate` is `@MainActor`-isolated, so conforming types must be main-actor isolated too (mark the class `@MainActor`):
+
 ```swift
-class MyChatDelegate: AIChatDelegate {
+@MainActor
+final class MyChatDelegate: AIChatDelegate {
     func chatDidSendMessage(_ message: String) {
         Analytics.track("chat_message_sent")
     }
