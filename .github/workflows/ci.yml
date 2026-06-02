@@ -41,3 +41,28 @@ jobs:
             -scheme AIChatSupport \
             -destination "id=$DEST_ID" \
             -skipPackagePluginValidation
+
+  example:
+    name: Build example app
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Select Xcode 26
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26.0'
+
+      - name: Build
+        run: |
+          set -o pipefail
+          DEST_ID=$(xcodebuild -project Examples/AIChatDemo/AIChatDemo.xcodeproj \
+            -scheme AIChatDemo -showdestinations 2>/dev/null \
+            | grep 'platform:iOS Simulator' | grep -v placeholder \
+            | grep -oE 'id:[0-9A-Fa-f-]+' | head -1 | cut -d: -f2)
+          if [ -z "$DEST_ID" ]; then echo "::error::No iOS Simulator destination found"; exit 1; fi
+          echo "Using destination id: $DEST_ID"
+          xcodebuild build \
+            -project Examples/AIChatDemo/AIChatDemo.xcodeproj \
+            -scheme AIChatDemo \
+            -destination "id=$DEST_ID"
