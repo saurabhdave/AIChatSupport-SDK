@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The modal close (✕) button now dismisses the presented chat (sheet or fullscreen cover). It
   previously only invoked the `chatDidDismiss` delegate callback without actually dismissing.
+- The chat now renders in its theme's color scheme instead of inheriting the device's, so themes
+  that mix fixed brand colors with system colors stay readable. Previously a light brand theme on
+  a device in Dark Mode produced unreadable bubbles (e.g. white text on a light surface).
+
+### Added
+
+- `AIChatTheme.colorScheme` pins how system colors resolve. The light/minimal presets use `.light`
+  and the dark preset uses `.dark`; `HostAppTheme.prefersDarkMode` overrides it.
 
 ## [1.0.0] - 2026-06-01
 
