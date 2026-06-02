@@ -263,6 +263,19 @@ myView.aiChatInline(configuration: config)
 
 ---
 
+## Example app
+
+A runnable SwiftUI showcase lives in [`Examples/AIChatDemo`](Examples/AIChatDemo). Open
+`Examples/AIChatDemo/AIChatDemo.xcodeproj` in Xcode, pick an iOS 26 simulator, and Run. It
+demonstrates the floating button, sheet/fullscreen/inline presentation, a branded `HostAppTheme`,
+and the lifecycle delegate.
+
+It runs on the **mock provider** out of the box — no API key needed. To try live streaming, set
+`OPENAI_API_KEY` or `ANTHROPIC_API_KEY` in the Run scheme's environment
+(**Product ▸ Scheme ▸ Edit Scheme… ▸ Run ▸ Arguments ▸ Environment Variables**).
+
+---
+
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes, including breaking changes.
