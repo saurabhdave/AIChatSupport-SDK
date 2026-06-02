@@ -21,48 +21,38 @@ struct ChatInputView: View {
     }
 
     private var textField: some View {
-        ZStack(alignment: .topLeading) {
+        VStack(alignment: .trailing, spacing: 0) {
+            TextField("Message...", text: $viewModel.inputText, axis: .vertical)
+                .font(.system(size: theme.inputFontSize, weight: theme.bodyFontWeight))
+                .foregroundStyle(theme.inputTextColor)
+                .lineLimit(1...maxLines)
+                .focused($isFocused)
+                .submitLabel(.send)
+                .onSubmit {
+                    // With a vertical-axis TextField, a hardware-keyboard Return submits while
+                    // Shift+Return inserts a newline; the software keyboard inserts newlines.
+                    if viewModel.canSend {
+                        viewModel.sendMessage()
+                    }
+                }
+
+            if viewModel.inputText.count > characterCountThreshold {
+                Text("\(viewModel.inputText.count)")
+                    .font(.system(size: theme.timestampFontSize))
+                    .foregroundStyle(theme.timestampColor)
+                    .padding(.top, 2)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
             RoundedRectangle(cornerRadius: theme.inputCornerRadius)
                 .fill(theme.prefersBorderedInput ? Color.clear : theme.inputBackgroundColor)
                 .overlay(
                     RoundedRectangle(cornerRadius: theme.inputCornerRadius)
                         .stroke(theme.prefersBorderedInput ? theme.inputBorderColor : Color.clear, lineWidth: 1.5)
                 )
-
-            if viewModel.inputText.isEmpty {
-                Text("Message...")
-                    .font(.system(size: theme.inputFontSize))
-                    .foregroundStyle(theme.inputPlaceholderColor)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
-                    .allowsHitTesting(false)
-            }
-
-            VStack(alignment: .trailing, spacing: 0) {
-                TextEditor(text: $viewModel.inputText)
-                    .font(.system(size: theme.inputFontSize))
-                    .foregroundStyle(theme.inputTextColor)
-                    .scrollContentBackground(.hidden)
-                    .background(Color.clear)
-                    .frame(maxHeight: maxHeight)
-                    .focused($isFocused)
-                    .onSubmit {
-                        if viewModel.canSend {
-                            viewModel.sendMessage()
-                        }
-                    }
-
-                if viewModel.inputText.count > characterCountThreshold {
-                    Text("\(viewModel.inputText.count)")
-                        .font(.system(size: theme.timestampFontSize))
-                        .foregroundStyle(theme.timestampColor)
-                        .padding(.trailing, 8)
-                        .padding(.bottom, 4)
-                }
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
-        }
+        )
         .frame(minHeight: 44)
     }
 
@@ -85,10 +75,6 @@ struct ChatInputView: View {
         .accessibilityLabel("Send message")
         .accessibilityHint("Double tap to send your message")
         .frame(width: 44, height: 44)
-    }
-
-    private var maxHeight: CGFloat {
-        CGFloat(maxLines) * (theme.inputFontSize + 8)
     }
 }
 
