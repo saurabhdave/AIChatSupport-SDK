@@ -7,41 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Breaking
+_Nothing yet._
 
-- **`AIChatDelegate` now refines `Sendable`** (and remains `@MainActor`-isolated). Delegate
-  conformers must therefore be main-actor isolated — annotate them with `@MainActor`:
+## [1.0.0] - 2026-06-01
+
+Initial public release.
+
+### Added
+
+- **AI providers** with SSE token streaming: OpenAI (`OpenAIConfig`), Anthropic
+  (`AnthropicConfig`, default model `claude-opus-4-8`), a `.custom` provider conforming to
+  `AIProviderProtocol`, and a deterministic `.mock` provider for development and tests.
+- **App knowledge → system prompt:** `AppContext` compiles product identity, domain
+  knowledge, behavioral rules, an FAQ knowledge base, and per-user context into a structured
+  system prompt.
+- **Theming:** `AIChatTheme` with `.light` / `.dark` / `.minimal` presets and a `.custom`
+  builder, plus `HostAppTheme` for mapping a host app's brand tokens (colors, corner-radius
+  style, font family, heading/body font weights, Dynamic Type) onto the chat UI.
+- **Presentation & launchers:** `.sheet`, `.fullScreen`, and `.inline` styles via the
+  `aiChatSupport(isPresented:configuration:)`, `aiChatFloatingButton(configuration:)`, and
+  `aiChatInline(configuration:)` view modifiers; `AIChatSupport.makeView` / `quickStart`
+  entry points.
+- **Chat experience:** streaming responses with a typing indicator, staggered welcome
+  messages, suggested-prompt chips, thumbs up/down feedback, per-message retry, a dismissible
+  error banner, haptics, message timestamps, and accessibility labels throughout.
+- **Lifecycle:** `AIChatDelegate` callbacks for sent message, received response, error, and
+  dismissal.
+
+### Notes
+
+- `AIChatDelegate` is `@MainActor`-isolated and refines `Sendable`. Conforming types must be
+  main-actor isolated — annotate them with `@MainActor`:
 
   ```swift
   @MainActor
   final class MyChatDelegate: AIChatDelegate { /* ... */ }
   ```
 
-  This removes the `nonisolated(unsafe)` escape hatch previously used for
-  `AIChatConfiguration.delegate`.
+- **Security:** the `.openAI` and `.anthropic` providers call the vendor API directly from
+  the device, so any embedded key is extractable. Use them for prototyping; in production
+  route requests through your own backend via a `.custom` provider. See the README.
 
-### Changed
-
-- The Anthropic provider's default model is now `claude-opus-4-8` (was `claude-opus-4-5`).
-- The message composer uses a vertical-axis `TextField`: a hardware-keyboard Return sends,
-  and Shift+Return inserts a newline (the previous `TextEditor.onSubmit` never fired).
-
-### Added
-
-- `AIChatTheme` now honors `headingFontWeight`, `bodyFontWeight`, and `usesDynamicType`.
-  These were declared on `HostAppTheme` but previously never applied.
-
-### Fixed
-
-- Provider requests no longer include the empty assistant placeholder or leading welcome
-  messages; the first message sent is always a user turn. This fixes 400-level errors from
-  providers (notably Anthropic) that require a non-empty, user-first message list.
-- In-flight requests are now cancelled when a new message is sent, the conversation is
-  cleared, or the chat view is dismissed.
-- The context-length-exceeded path now trims older turns and retries exactly once instead
-  of potentially re-trimming.
-- The error banner's **Retry** button now retries the failed message instead of only
-  dismissing the banner.
-- The message list stays pinned to the bottom while a response streams in.
-- The date header reflects the first message's timestamp rather than always showing "Today".
-- The system-prompt identity line keeps the company name even when the app name is empty.
+[Unreleased]: https://github.com/saurabhdave/AIChatSupport-SDK/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/saurabhdave/AIChatSupport-SDK/releases/tag/1.0.0
