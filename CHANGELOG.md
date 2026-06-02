@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Configure from JSON.** New `AIChatConfigurationFile` loads everything except the provider/delegate
+  from a JSON file (`init(data:)` / `init(contentsOf:)` / `init(resource:bundle:)` →
+  `makeConfiguration(provider:delegate:)`). Pure-data config types are now `Codable` (`AppContext`,
+  `FAQ`, `UserInfo`, `TonePersonality`, `AvatarStyle`, `PresentationStyle`, `WelcomeMessage`,
+  `CornerRadiusStyle`), brand tokens use hex colors via a new `Color(hex:)`, and decoding is lenient
+  (omitted fields use defaults).
+
 ### Fixed
 
 - The modal close (✕) button now dismisses the presented chat (sheet or fullscreen cover). It
