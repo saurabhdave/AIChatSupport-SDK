@@ -119,3 +119,46 @@ public struct HostAppTheme: Sendable {
         self.reducedMotion = reducedMotion
     }
 }
+
+// MARK: - Codable
+
+extension CornerRadiusStyle: Codable {
+    private enum CodingKeys: String, CodingKey { case bubble, input }
+
+    public init(from decoder: Decoder) throws {
+        let single = try decoder.singleValueContainer()
+        if let raw = try? single.decode(String.self) {
+            switch raw {
+            case "rounded": self = .rounded
+            case "pill": self = .pill
+            case "subtle": self = .subtle
+            case "sharp": self = .sharp
+            case let other:
+                throw DecodingError.dataCorruptedError(in: single,
+                    debugDescription: "Unknown cornerRadiusStyle '\(other)'")
+            }
+        } else {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            self = .custom(bubble: try c.decode(CGFloat.self, forKey: .bubble),
+                           input: try c.decode(CGFloat.self, forKey: .input))
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        switch self {
+        case .custom(let bubble, let input):
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(bubble, forKey: .bubble)
+            try c.encode(input, forKey: .input)
+        case .rounded, .pill, .subtle, .sharp:
+            var c = encoder.singleValueContainer()
+            switch self {
+            case .rounded: try c.encode("rounded")
+            case .pill: try c.encode("pill")
+            case .subtle: try c.encode("subtle")
+            case .sharp: try c.encode("sharp")
+            case .custom: break
+            }
+        }
+    }
+}

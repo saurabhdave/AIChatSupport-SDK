@@ -146,3 +146,71 @@ public struct AIChatConfiguration: Sendable {
         self.delegate = delegate
     }
 }
+
+// MARK: - Codable
+
+extension AvatarStyle: Codable {
+    private enum CodingKeys: String, CodingKey { case type, value }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        switch try c.decode(String.self, forKey: .type) {
+        case "sfSymbol": self = .sfSymbol(try c.decode(String.self, forKey: .value))
+        case "assetName": self = .assetName(try c.decode(String.self, forKey: .value))
+        case "initials": self = .initials(try c.decode(String.self, forKey: .value))
+        case "none": self = .none
+        case let other:
+            throw DecodingError.dataCorruptedError(forKey: .type, in: c,
+                debugDescription: "Unknown avatar type '\(other)'")
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .sfSymbol(let v): try c.encode("sfSymbol", forKey: .type); try c.encode(v, forKey: .value)
+        case .assetName(let v): try c.encode("assetName", forKey: .type); try c.encode(v, forKey: .value)
+        case .initials(let v): try c.encode("initials", forKey: .type); try c.encode(v, forKey: .value)
+        case .none: try c.encode("none", forKey: .type)
+        }
+    }
+}
+
+extension PresentationStyle: Codable, Equatable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        switch try container.decode(String.self) {
+        case "sheet": self = .sheet
+        case "fullScreen": self = .fullScreen
+        case "inline": self = .inline
+        case let other:
+            throw DecodingError.dataCorruptedError(in: container,
+                debugDescription: "Unknown presentationStyle '\(other)'")
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        switch self {
+        case .sheet: try c.encode("sheet")
+        case .fullScreen: try c.encode("fullScreen")
+        case .inline: try c.encode("inline")
+        }
+    }
+}
+
+extension WelcomeMessage: Codable {
+    private enum CodingKeys: String, CodingKey { case text, delay }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(text: try c.decode(String.self, forKey: .text),
+                  delay: try c.decodeIfPresent(TimeInterval.self, forKey: .delay) ?? 0)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(text, forKey: .text)
+        try c.encode(delay, forKey: .delay)
+    }
+}

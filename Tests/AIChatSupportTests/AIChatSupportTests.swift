@@ -657,4 +657,28 @@ struct JSONConfigTests {
         #expect(back.faqs.first?.question == "Q?")
         #expect(back.handoffMessage == "Hold on.")
     }
+
+    @Test("AvatarStyle decodes the {type,value} object form")
+    func avatarDecoding() throws {
+        let a = try JSONDecoder().decode(AvatarStyle.self, from: Data(#"{"type":"sfSymbol","value":"bag.fill"}"#.utf8))
+        if case .sfSymbol(let name) = a { #expect(name == "bag.fill") } else { Issue.record("wrong case") }
+        let none = try JSONDecoder().decode(AvatarStyle.self, from: Data(#"{"type":"none"}"#.utf8))
+        if case .none = none {} else { Issue.record("expected .none") }
+    }
+
+    @Test("PresentationStyle and WelcomeMessage decode")
+    func presentationAndWelcome() throws {
+        #expect(try JSONDecoder().decode(PresentationStyle.self, from: Data("\"fullScreen\"".utf8)) == .fullScreen)
+        let w = try JSONDecoder().decode(WelcomeMessage.self, from: Data(#"{"text":"Hi"}"#.utf8))
+        #expect(w.text == "Hi")
+        #expect(w.delay == 0)
+    }
+
+    @Test("CornerRadiusStyle decodes preset string and custom object")
+    func cornerRadiusDecoding() throws {
+        #expect(try JSONDecoder().decode(CornerRadiusStyle.self, from: Data("\"pill\"".utf8)).bubbleRadius == 99)
+        let custom = try JSONDecoder().decode(CornerRadiusStyle.self, from: Data(#"{"bubble":12,"input":16}"#.utf8))
+        #expect(custom.bubbleRadius == 12)
+        #expect(custom.inputRadius == 16)
+    }
 }
