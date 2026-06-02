@@ -12,8 +12,9 @@ struct DelegateDemo: View {
             Divider()
             eventLog
         }
-        .navigationTitle("Delegate & Events")
+        // Hide the nav title so the chat's own header is the only header; the back button remains.
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
     }
 
     private var eventLog: some View {

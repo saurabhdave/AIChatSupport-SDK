@@ -14,8 +14,9 @@ struct BrandedThemeDemo: View {
     }
 
     var body: some View {
+        // Hide the nav title so the chat's own header is the only header; the back button remains.
         AIChatSupport.makeView(configuration: SampleData.configuration(hostAppTheme: brand))
-            .navigationTitle("Branded Theme")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
     }
 }
