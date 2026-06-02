@@ -3,6 +3,7 @@ import SwiftUI
 
 /// Presents the chat as a sheet or a fullscreen cover.
 struct PresentationDemo: View {
+    let persona: DemoPersona
     @State private var showSheet = false
     @State private var showFullScreen = false
 
@@ -13,11 +14,11 @@ struct PresentationDemo: View {
         }
         .aiChatSupport(
             isPresented: $showSheet,
-            configuration: SampleData.configuration(presentationStyle: .sheet)
+            configuration: persona.makeConfiguration(presentationStyle: .sheet)
         )
         .aiChatSupport(
             isPresented: $showFullScreen,
-            configuration: SampleData.configuration(presentationStyle: .fullScreen)
+            configuration: persona.makeConfiguration(presentationStyle: .fullScreen)
         )
         .navigationTitle("Presentation")
         .navigationBarTitleDisplayMode(.inline)

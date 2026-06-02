@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 71;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,7 +15,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		1A0000000000000000000006 /* AIChatDemo */ = {isa = PBXFileSystemSynchronizedRootGroup; path = AIChatDemo; sourceTree = "<group>"; };
+		1A0000000000000000000006 /* AIChatDemo */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = AIChatDemo; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,7 +100,6 @@
 			packageReferences = (
 				1A0000000000000000000010 /* XCLocalSwiftPackageReference "../.." */,
 			);
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 1A0000000000000000000005 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -252,7 +251,7 @@
 /* Begin XCLocalSwiftPackageReference section */
 		1A0000000000000000000010 /* XCLocalSwiftPackageReference "../.." */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = "../..";
+			relativePath = ../..;
 		};
 /* End XCLocalSwiftPackageReference section */
 

@@ -270,6 +270,9 @@ A runnable SwiftUI showcase lives in [`Examples/AIChatDemo`](Examples/AIChatDemo
 demonstrates the floating button, sheet/fullscreen/inline presentation, a branded `HostAppTheme`,
 and the lifecycle delegate.
 
+Two tab-bar domains — an **e-commerce** assistant (ShopEasy) and a **travel concierge** (Wanderly)
+— show the same SDK adapting its identity, prompts, knowledge, and brand to any context.
+
 It runs on the **mock provider** out of the box — no API key needed. To try live streaming, set
 `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` in the Run scheme's environment
 (**Product ▸ Scheme ▸ Edit Scheme… ▸ Run ▸ Arguments ▸ Environment Variables**).

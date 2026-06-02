@@ -3,6 +3,8 @@ import SwiftUI
 
 /// A faux host screen with the SDK's floating action button overlaid.
 struct FloatingButtonDemo: View {
+    let persona: DemoPersona
+
     var body: some View {
         List {
             Section("Your app's content") {
@@ -15,7 +17,7 @@ struct FloatingButtonDemo: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .aiChatFloatingButton(configuration: SampleData.configuration())
+        .aiChatFloatingButton(configuration: persona.makeConfiguration())
         .navigationTitle("Floating Button")
         .navigationBarTitleDisplayMode(.inline)
     }

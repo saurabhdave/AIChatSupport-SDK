@@ -3,11 +3,12 @@ import SwiftUI
 
 /// Chat alongside a live log of AIChatDelegate callbacks.
 struct DelegateDemo: View {
+    let persona: DemoPersona
     @State private var delegate = DemoChatDelegate()
 
     var body: some View {
         VStack(spacing: 0) {
-            AIChatSupport.makeView(configuration: SampleData.configuration(delegate: delegate))
+            AIChatSupport.makeView(configuration: persona.makeConfiguration(delegate: delegate))
                 .frame(maxHeight: .infinity)
             Divider()
             eventLog
