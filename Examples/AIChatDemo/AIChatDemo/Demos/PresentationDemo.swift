@@ -1,0 +1,25 @@
+import AIChatSupport
+import SwiftUI
+
+/// Presents the chat as a sheet or a fullscreen cover.
+struct PresentationDemo: View {
+    @State private var showSheet = false
+    @State private var showFullScreen = false
+
+    var body: some View {
+        List {
+            Button("Open as sheet") { showSheet = true }
+            Button("Open fullscreen") { showFullScreen = true }
+        }
+        .aiChatSupport(
+            isPresented: $showSheet,
+            configuration: SampleData.configuration(presentationStyle: .sheet)
+        )
+        .aiChatSupport(
+            isPresented: $showFullScreen,
+            configuration: SampleData.configuration(presentationStyle: .fullScreen)
+        )
+        .navigationTitle("Presentation")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
