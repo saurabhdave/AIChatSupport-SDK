@@ -270,18 +270,35 @@ A runnable SwiftUI showcase lives in [`Examples/AIChatDemo`](Examples/AIChatDemo
 demonstrates the floating button, sheet/fullscreen/inline presentation, a branded `HostAppTheme`,
 and the lifecycle delegate.
 
-Two tab-bar domains — an **e-commerce** assistant (ShopEasy) and a **travel concierge** (Wanderly)
-— show the same SDK adapting its identity, prompts, knowledge, and brand to any context.
+Three tab-bar domains — an **e-commerce** assistant (ShopEasy), a **travel concierge** (Wanderly),
+and an **on-device** assistant — show the same SDK adapting its identity, prompts, knowledge, and
+brand to any context.
 
-| Showcase home | E-commerce chat | Travel chat | Branded theme |
+| Showcase home (3 domains) | E-commerce chat | Travel chat | Branded theme |
 |---|---|---|---|
-| <img src="Examples/AIChatDemo/Screenshots/01-home.png" width="200" alt="Showcase home with ShopEasy and Wanderly tabs"> | <img src="Examples/AIChatDemo/Screenshots/02-shopeasy-chat.png" width="200" alt="ShopEasy e-commerce chat"> | <img src="Examples/AIChatDemo/Screenshots/03-wanderly-chat.png" width="200" alt="Wanderly travel chat"> | <img src="Examples/AIChatDemo/Screenshots/04-wanderly-branded.png" width="200" alt="Wanderly branded theme"> |
+| <img src="Examples/AIChatDemo/Screenshots/01-home.png" width="200" alt="Showcase home with ShopEasy, Wanderly and On-Device tabs"> | <img src="Examples/AIChatDemo/Screenshots/02-shopeasy-chat.png" width="200" alt="ShopEasy e-commerce chat"> | <img src="Examples/AIChatDemo/Screenshots/03-wanderly-chat.png" width="200" alt="Wanderly travel chat"> | <img src="Examples/AIChatDemo/Screenshots/04-wanderly-branded.png" width="200" alt="Wanderly branded theme"> |
 
 _Captured on iOS 26 Simulator. The chat stays light even with the device in Dark Mode because the theme pins its own color scheme._
 
 It runs on the **mock provider** out of the box — no API key needed. To try live streaming, set
 `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` in the Run scheme's environment
 (**Product ▸ Scheme ▸ Edit Scheme… ▸ Run ▸ Arguments ▸ Environment Variables**).
+
+### On-device & custom models
+
+The SDK is model-agnostic — you can point it at any LLM, including your own fine-tuned model:
+
+- **OpenAI-compatible endpoint (no code):** set `OpenAIConfig.baseURL` + `model` to a server such as
+  Ollama, vLLM, LM Studio, llama.cpp, TGI, Together/Groq/OpenRouter, Azure OpenAI, or a fine-tuned
+  OpenAI model id.
+- **Anything else (`.custom`):** conform to `AIProviderProtocol` and return an
+  `AsyncThrowingStream<String, any Error>` — a bespoke HTTP/SSE API, or an **on-device** model.
+
+The **On-Device** tab is a working `.custom` example: [`OnDeviceModelProvider`](Examples/AIChatDemo/AIChatDemo/Support/OnDeviceModelProvider.swift)
+bridges Apple's **Foundation Models** on-device LLM (no network, no API key). It requires an
+Apple Intelligence–capable device with the feature enabled — on the Simulator or unsupported
+devices the chat shows an availability message. For a custom-*trained* model, load a trained adapter
+via `SystemLanguageModel(adapter:)` and pass it to `LanguageModelSession(model:)`.
 
 ---
 
