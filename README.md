@@ -24,14 +24,14 @@ Zero third-party dependencies.
 In Xcode: **File → Add Package Dependencies** and enter:
 
 ```
-https://github.com/your-org/AIChatSupport-SDK
+https://github.com/saurabhdave/AIChatSupport-SDK
 ```
 
 Or add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/your-org/AIChatSupport-SDK", .upToNextMajor(from: "1.0.0"))
+    .package(url: "https://github.com/saurabhdave/AIChatSupport-SDK", .upToNextMajor(from: "1.0.0"))
 ]
 ```
 
@@ -293,6 +293,27 @@ The SDK is model-agnostic — you can point it at any LLM, including your own fi
   OpenAI model id.
 - **Anything else (`.custom`):** conform to `AIProviderProtocol` and return an
   `AsyncThrowingStream<String, any Error>` — a bespoke HTTP/SSE API, or an **on-device** model.
+
+#### Local / self-hosted model (e.g. Ollama)
+
+Ollama, vLLM, and LM Studio all expose an OpenAI-compatible API, so a local model needs no custom
+code — just repoint `OpenAIConfig`:
+
+```swift
+// `ollama serve` then `ollama pull llama3.2`
+let config = AIChatConfiguration(
+    provider: .openAI(OpenAIConfig(
+        apiKey: "ollama",                     // any non-empty string; local servers ignore it
+        model: "llama3.2",
+        baseURL: "http://localhost:11434/v1"  // Simulator reaches the host; on a device use your Mac's LAN IP
+    )),
+    appContext: AppContext(appName: "MyApp", appDescription: "…")
+)
+```
+
+> **Cleartext HTTP note:** App Transport Security blocks plain `http://` by default. For a local
+> server add an ATS exception to your app's Info.plist — `NSAllowsLocalNetworking = YES` for
+> `localhost`, or an `NSExceptionDomains` entry for a LAN host. Production traffic should use HTTPS.
 
 The **On-Device** tab is a working `.custom` example: [`OnDeviceModelProvider`](Examples/AIChatDemo/AIChatDemo/Support/OnDeviceModelProvider.swift)
 bridges Apple's **Foundation Models** on-device LLM (no network, no API key). It requires an
