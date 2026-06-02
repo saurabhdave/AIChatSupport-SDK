@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_Nothing yet._
+
+## [1.1.0] - 2026-06-02
+
 ### Added
 
 - **Configure from JSON.** New `AIChatConfigurationFile` loads everything except the provider/delegate
@@ -15,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `FAQ`, `UserInfo`, `TonePersonality`, `AvatarStyle`, `PresentationStyle`, `WelcomeMessage`,
   `CornerRadiusStyle`), brand tokens use hex colors via a new `Color(hex:)`, and decoding is lenient
   (omitted fields use defaults).
+- `AIChatTheme.colorScheme` pins how system colors resolve. The light/minimal presets use `.light`
+  and the dark preset uses `.dark`; `HostAppTheme.prefersDarkMode` overrides it.
 
 ### Fixed
 
@@ -23,11 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The chat now renders in its theme's color scheme instead of inheriting the device's, so themes
   that mix fixed brand colors with system colors stay readable. Previously a light brand theme on
   a device in Dark Mode produced unreadable bubbles (e.g. white text on a light surface).
-
-### Added
-
-- `AIChatTheme.colorScheme` pins how system colors resolve. The light/minimal presets use `.light`
-  and the dark preset uses `.dark`; `HostAppTheme.prefersDarkMode` overrides it.
 
 ## [1.0.0] - 2026-06-01
 
@@ -68,5 +69,6 @@ Initial public release.
   the device, so any embedded key is extractable. Use them for prototyping; in production
   route requests through your own backend via a `.custom` provider. See the README.
 
-[Unreleased]: https://github.com/saurabhdave/AIChatSupport-SDK/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/saurabhdave/AIChatSupport-SDK/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/saurabhdave/AIChatSupport-SDK/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/saurabhdave/AIChatSupport-SDK/releases/tag/1.0.0
