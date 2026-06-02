@@ -5,3 +5,4 @@
 *.resolved
 DerivedData/
 .swiftpm/
+docs/superpowers/
